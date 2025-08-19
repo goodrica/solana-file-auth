@@ -14,7 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      file_authentications: {
+        Row: {
+          authenticated_at: string
+          blockchain_network: string
+          created_at: string
+          file_hash: string
+          file_name: string | null
+          file_size: number | null
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          authenticated_at?: string
+          blockchain_network?: string
+          created_at?: string
+          file_hash: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          authenticated_at?: string
+          blockchain_network?: string
+          created_at?: string
+          file_hash?: string
+          file_name?: string | null
+          file_size?: number | null
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

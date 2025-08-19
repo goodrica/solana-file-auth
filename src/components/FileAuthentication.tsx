@@ -5,12 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Upload, FileText, Hash, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface FileInfo {
   name: string;
   size: number;
   type: string;
   hash?: string;
+  authenticationId?: string;
+  timestamp?: string;
 }
 
 const FileAuthentication = () => {
@@ -59,23 +62,42 @@ const FileAuthentication = () => {
       };
       setFile(fileInfo);
 
-      // Simulate progress during hashing
-      for (let i = 0; i <= 50; i += 10) {
-        setProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 100));
-      }
+      // Progress during hashing
+      setProgress(20);
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       // Calculate hash
       const hash = await calculateFileHash(selectedFile);
       setFile(prev => prev ? { ...prev, hash } : null);
-      setProgress(60);
+      setProgress(50);
 
-      // Simulate blockchain submission
+      // Submit to blockchain via Supabase edge function
       setStatus('uploading');
-      for (let i = 60; i <= 100; i += 10) {
-        setProgress(i);
-        await new Promise(resolve => setTimeout(resolve, 200));
+      setProgress(70);
+
+      const { data, error } = await supabase.functions.invoke('solana-file-auth', {
+        body: {
+          action: 'authenticate',
+          fileHash: hash,
+          fileName: selectedFile.name,
+          fileSize: selectedFile.size
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to authenticate file');
       }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Authentication failed');
+      }
+
+      setProgress(100);
+      setFile(prev => prev ? { 
+        ...prev, 
+        authenticationId: data.data.id,
+        timestamp: data.data.timestamp 
+      } : null);
 
       setStatus('success');
       toast({
@@ -83,11 +105,12 @@ const FileAuthentication = () => {
         description: "Your file hash has been recorded on the Solana blockchain.",
       });
 
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Authentication error:', error);
       setStatus('error');
       toast({
         title: "Authentication failed",
-        description: "There was an error processing your file. Please try again.",
+        description: error.message || "There was an error processing your file. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -197,6 +220,19 @@ const FileAuthentication = () => {
                         <code className="text-xs text-muted-foreground font-mono break-all">
                           {file.hash}
                         </code>
+                        
+                        {/* Authentication Details */}
+                        {file.authenticationId && (
+                          <div className="mt-3 pt-3 border-t border-border/50">
+                            <div className="text-xs text-muted-foreground space-y-1">
+                              <div>ID: {file.authenticationId}</div>
+                              {file.timestamp && (
+                                <div>Authenticated: {new Date(file.timestamp).toLocaleString()}</div>
+                              )}
+                              <div>Network: Solana</div>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </CardContent>

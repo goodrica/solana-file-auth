@@ -6,11 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Search, FileText, Hash, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 interface VerificationResult {
   status: 'verified' | 'not-found' | 'error';
   timestamp?: string;
   blockchainRecord?: string;
+  fileName?: string;
+  fileSize?: number;
+  authenticationId?: string;
 }
 
 const FileVerification = () => {
@@ -31,17 +35,29 @@ const FileVerification = () => {
     setVerifying(true);
     
     try {
-      // Simulate blockchain verification
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Mock verification result
-      const isVerified = Math.random() > 0.3; // 70% chance of being verified
-      
-      if (isVerified) {
+      const { data, error } = await supabase.functions.invoke('solana-file-auth', {
+        body: {
+          action: 'verify',
+          fileHash: hash
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to verify file');
+      }
+
+      if (!data.success) {
+        throw new Error(data.error || 'Verification failed');
+      }
+
+      if (data.verified) {
         setResult({
           status: 'verified',
-          timestamp: new Date().toISOString(),
-          blockchainRecord: `solana:${hash.substring(0, 16)}...`
+          timestamp: data.data.authenticatedAt,
+          blockchainRecord: `solana:${data.data.id}`,
+          fileName: data.data.fileName,
+          fileSize: data.data.fileSize,
+          authenticationId: data.data.id
         });
         toast({
           title: "File verified successfully!",
@@ -57,13 +73,14 @@ const FileVerification = () => {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch (error: any) {
+      console.error('Verification error:', error);
       setResult({
         status: 'error'
       });
       toast({
         title: "Verification failed",
-        description: "There was an error verifying the file. Please try again.",
+        description: error.message || "There was an error verifying the file. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -230,21 +247,40 @@ const FileVerification = () => {
 
                   {result.status === 'verified' && (
                     <>
+                      {result.fileName && (
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">File Name:</span>
+                          <span className="text-sm text-muted-foreground">
+                            {result.fileName}
+                          </span>
+                        </div>
+                      )}
+                      {result.fileSize && (
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">File Size:</span>
+                          <span className="text-sm text-muted-foreground">
+                            {(result.fileSize / 1024).toFixed(2)} KB
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Timestamp:</span>
+                        <span className="font-medium">Authenticated:</span>
                         <span className="text-sm text-muted-foreground">
                           {new Date(result.timestamp!).toLocaleString()}
                         </span>
                       </div>
                       <div className="flex items-center justify-between">
-                        <span className="font-medium">Blockchain Record:</span>
+                        <span className="font-medium">Authentication ID:</span>
                         <code className="text-xs bg-muted px-2 py-1 rounded">
-                          {result.blockchainRecord}
+                          {result.authenticationId}
                         </code>
                       </div>
                       <div className="p-4 bg-success/10 border border-success/20 rounded-lg">
                         <p className="text-sm text-success font-medium">
                           ✓ File authenticity confirmed on Solana blockchain
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          This file was authenticated using QuickNode infrastructure
                         </p>
                       </div>
                     </>
