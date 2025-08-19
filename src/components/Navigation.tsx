@@ -65,6 +65,9 @@ const Navigation = () => {
             <a href="#how-it-works" className="text-muted-foreground hover:text-primary transition-colors">
               How It Works
             </a>
+            <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">
+              About
+            </a>
           </div>
 
           {/* Auth Buttons */}
