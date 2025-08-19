@@ -1,1 +1,4 @@
 project_id = "thfalxtopjlgpoiadcmt"
+
+[functions.solana-file-auth]
+verify_jwt = false
