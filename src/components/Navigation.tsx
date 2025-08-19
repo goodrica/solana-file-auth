@@ -1,7 +1,49 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Shield, FileCheck, Verified } from "lucide-react";
+import { Shield, FileCheck, Verified, LogOut, User } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 const Navigation = () => {
+  const [session, setSession] = useState<Session | null>(null);
+
+  useEffect(() => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      // Clean up auth state
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Attempt global sign out
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        // Continue even if this fails
+      }
+      
+      // Force page reload for clean state
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
+  };
+
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-md border-b border-border">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -25,11 +67,26 @@ const Navigation = () => {
             </a>
           </div>
 
-          {/* CTA Button */}
-          <Button variant="hero" size="sm">
-            <FileCheck className="h-4 w-4" />
-            Get Started
-          </Button>
+          {/* Auth Buttons */}
+          <div className="flex items-center space-x-3">
+            {session ? (
+              <div className="flex items-center space-x-3">
+                <div className="hidden sm:flex items-center space-x-2 text-sm">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-muted-foreground">{session.user.email}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={handleSignOut}>
+                  <LogOut className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Sign Out</span>
+                </Button>
+              </div>
+            ) : (
+              <Button variant="hero" size="sm" onClick={() => window.location.href = '/auth'}>
+                <FileCheck className="h-4 w-4" />
+                <span className="hidden sm:inline ml-2">Get Started</span>
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </nav>
