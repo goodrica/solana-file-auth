@@ -23,6 +23,21 @@ serve(async (req) => {
   try {
     console.log('Processing file auth request...')
     
+    // Get the authorization header for user authentication
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Authentication required'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
+        }
+      )
+    }
+    
     // Get environment variables
     const quicknodeUrl = Deno.env.get('QUICKNODE_RPC_URL')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
@@ -38,6 +53,23 @@ serve(async (req) => {
 
     // Initialize Supabase client
     const supabase = createClient(supabaseUrl, supabaseKey)
+
+    // Verify the user's JWT token and get user ID
+    const jwt = authHeader.replace('Bearer ', '')
+    const { data: { user }, error: authError } = await supabase.auth.getUser(jwt)
+    
+    if (authError || !user) {
+      return new Response(
+        JSON.stringify({
+          success: false,
+          error: 'Invalid authentication token'
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 401
+        }
+      )
+    }
 
     // Parse request body
     const { action, fileHash, fileName, fileSize }: FileAuthRequest = await req.json()
@@ -56,7 +88,8 @@ serve(async (req) => {
           file_name: fileName,
           file_size: fileSize,
           blockchain_network: 'solana',
-          authenticated_at: new Date().toISOString()
+          authenticated_at: new Date().toISOString(),
+          user_id: user.id
         })
         .select()
         .single()
@@ -92,11 +125,12 @@ serve(async (req) => {
       )
 
     } else if (action === 'verify') {
-      // Check if file hash exists in our database
+      // Check if file hash exists in our database for this user
       const { data: authRecord, error: verifyError } = await supabase
         .from('file_authentications')
         .select('*')
         .eq('file_hash', fileHash)
+        .eq('user_id', user.id)
         .single()
 
       if (verifyError && verifyError.code !== 'PGRST116') {

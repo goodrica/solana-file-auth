@@ -24,6 +24,7 @@ export type Database = {
           file_size: number | null
           id: string
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           authenticated_at?: string
@@ -34,6 +35,7 @@ export type Database = {
           file_size?: number | null
           id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           authenticated_at?: string
@@ -44,6 +46,7 @@ export type Database = {
           file_size?: number | null
           id?: string
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

@@ -1,12 +1,13 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Search, FileText, Hash, CheckCircle, XCircle, AlertTriangle } from "lucide-react";
+import { Search, FileText, Hash, CheckCircle, XCircle, AlertTriangle, LogIn, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 interface VerificationResult {
   status: 'verified' | 'not-found' | 'error';
@@ -22,7 +23,25 @@ const FileVerification = () => {
   const [hashInput, setHashInput] = useState('');
   const [verifying, setVerifying] = useState(false);
   const [result, setResult] = useState<VerificationResult | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const calculateFileHash = async (file: File): Promise<string> => {
     const buffer = await file.arrayBuffer();
@@ -39,6 +58,9 @@ const FileVerification = () => {
         body: {
           action: 'verify',
           fileHash: hash
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
         }
       });
 
@@ -120,6 +142,25 @@ const FileVerification = () => {
             </p>
           </div>
 
+          {authLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin" />
+              <span className="ml-3 text-lg">Loading...</span>
+            </div>
+          ) : !session ? (
+            <Card className="shadow-card bg-card/50 backdrop-blur-sm border-border/50">
+              <CardContent className="text-center py-16">
+                <LogIn className="h-16 w-16 mx-auto mb-6 text-muted-foreground" />
+                <h3 className="text-2xl font-semibold mb-4">Authentication Required</h3>
+                <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+                  Please sign in to verify your files. Only authenticated users can access their file verification records.
+                </p>
+                <Button size="lg" onClick={() => window.location.href = '/auth'}>
+                  Sign In to Verify Files
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
           <div className="grid md:grid-cols-2 gap-8">
             {/* File Upload Verification */}
             <Card className="shadow-card bg-card/50 backdrop-blur-sm border-border/50">
@@ -216,6 +257,7 @@ const FileVerification = () => {
               </CardContent>
             </Card>
           </div>
+          )}
 
           {/* Verification Result */}
           {result && (

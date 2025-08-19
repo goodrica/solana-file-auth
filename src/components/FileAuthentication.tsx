@@ -1,11 +1,12 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, Hash, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Upload, FileText, Hash, Loader2, CheckCircle, AlertCircle, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 interface FileInfo {
   name: string;
@@ -22,7 +23,25 @@ const FileAuthentication = () => {
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
   const [status, setStatus] = useState<'idle' | 'hashing' | 'uploading' | 'success' | 'error'>('idle');
+  const [session, setSession] = useState<Session | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check for existing session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const calculateFileHash = async (file: File): Promise<string> => {
     const buffer = await file.arrayBuffer();
@@ -81,6 +100,9 @@ const FileAuthentication = () => {
           fileHash: hash,
           fileName: selectedFile.name,
           fileSize: selectedFile.size
+        },
+        headers: {
+          Authorization: `Bearer ${session?.access_token}`
         }
       });
 
@@ -150,6 +172,24 @@ const FileAuthentication = () => {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+              {authLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin" />
+                  <span className="ml-2">Loading...</span>
+                </div>
+              ) : !session ? (
+                <div className="text-center py-8">
+                  <LogIn className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-lg font-semibold mb-2">Authentication Required</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Please sign in to authenticate your files on the blockchain
+                  </p>
+                  <Button onClick={() => window.location.href = '/auth'}>
+                    Sign In
+                  </Button>
+                </div>
+              ) : (
+                <>
               {/* Upload Area */}
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
@@ -271,6 +311,8 @@ const FileAuthentication = () => {
                     <p className="text-xs text-muted-foreground">Please try again or contact support</p>
                   </div>
                 </div>
+              )}
+                </>
               )}
             </CardContent>
           </Card>
