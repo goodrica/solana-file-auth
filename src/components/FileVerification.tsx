@@ -58,9 +58,6 @@ const FileVerification = () => {
         body: {
           action: 'verify',
           fileHash: hash
-        },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
         }
       });
 

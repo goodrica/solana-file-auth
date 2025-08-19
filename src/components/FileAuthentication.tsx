@@ -100,9 +100,6 @@ const FileAuthentication = () => {
           fileHash: hash,
           fileName: selectedFile.name,
           fileSize: selectedFile.size
-        },
-        headers: {
-          Authorization: `Bearer ${session?.access_token}`
         }
       });
 
