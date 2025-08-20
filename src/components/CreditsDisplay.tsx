@@ -4,6 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Coins, Camera, ShoppingCart } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import FotTokenPurchase from "./FotTokenPurchase";
 import type { Session } from "@supabase/supabase-js";
 
 interface UserCredits {
@@ -122,17 +123,21 @@ const CreditsDisplay = ({ session, onCreditsUpdate }: CreditsDisplayProps) => {
                 ? "No credits remaining! Purchase FOT tokens to continue." 
                 : "Running low on credits. Purchase FOT tokens to continue authenticating photos."}
             </p>
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="w-full"
-              disabled
+            <FotTokenPurchase 
+              session={session} 
+              onPurchaseComplete={fetchCredits}
             >
-              <ShoppingCart className="h-3 w-3 mr-1" />
-              Buy FOT Tokens (Coming Soon)
-            </Button>
+              <Button 
+                size="sm" 
+                variant="outline" 
+                className="w-full"
+              >
+                <ShoppingCart className="h-3 w-3 mr-1" />
+                Buy FOT Tokens
+              </Button>
+            </FotTokenPurchase>
             <p className="text-xs text-center text-muted-foreground mt-1">
-              FOT tokens will cost ~$0.03 each
+              FOT tokens cost ~$0.03 each
             </p>
           </div>
         )}
