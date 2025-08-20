@@ -80,6 +80,57 @@ serve(async (req) => {
     const connection = new Connection(quicknodeUrl, 'confirmed')
 
     if (action === 'authenticate') {
+      // Check user credits first
+      const { data: creditsData, error: creditsError } = await supabase
+        .from('user_credits')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+
+      if (creditsError && creditsError.code !== 'PGRST116') {
+        console.error('Credits check error:', creditsError)
+        throw new Error('Failed to check user credits')
+      }
+
+      // Initialize credits if user doesn't have a record
+      let userCredits = creditsData
+      if (!userCredits) {
+        const { data: newCredits, error: insertError } = await supabase
+          .from('user_credits')
+          .insert({
+            user_id: user.id,
+            free_credits_remaining: 10,
+            purchased_credits: 0,
+            total_authentications: 0
+          })
+          .select()
+          .single()
+
+        if (insertError) {
+          console.error('Failed to initialize credits:', insertError)
+          throw new Error('Failed to initialize user credits')
+        }
+        
+        userCredits = newCredits
+      }
+
+      // Check if user has sufficient credits
+      const totalCredits = userCredits.free_credits_remaining + userCredits.purchased_credits
+      if (totalCredits <= 0) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: 'insufficient_credits',
+            message: 'You have no authentication credits remaining. Purchase FOT tokens to continue.',
+            creditsRemaining: totalCredits
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 402
+          }
+        )
+      }
+
       // Store file authentication record in database
       const { data: authData, error: authError } = await supabase
         .from('file_authentications')
@@ -99,6 +150,25 @@ serve(async (req) => {
         throw new Error('Failed to store authentication record')
       }
 
+      // Deduct one credit (prioritize free credits first)
+      const updatedFreeCredits = Math.max(0, userCredits.free_credits_remaining - 1)
+      const creditsToDeductFromPurchased = Math.max(0, 1 - userCredits.free_credits_remaining)
+      const updatedPurchasedCredits = Math.max(0, userCredits.purchased_credits - creditsToDeductFromPurchased)
+
+      const { error: updateError } = await supabase
+        .from('user_credits')
+        .update({
+          free_credits_remaining: updatedFreeCredits,
+          purchased_credits: updatedPurchasedCredits,
+          total_authentications: userCredits.total_authentications + 1
+        })
+        .eq('user_id', user.id)
+
+      if (updateError) {
+        console.error('Failed to update credits:', updateError)
+        // Don't fail the authentication, just log the error
+      }
+
       console.log('File authentication record created:', authData.id)
 
       // Get network info to include in response
@@ -116,7 +186,8 @@ serve(async (req) => {
             blockchainNetwork: 'solana',
             networkSlot: slot,
             blockTime: blockTime ? new Date(blockTime * 1000).toISOString() : null
-          }
+          },
+          creditsRemaining: updatedFreeCredits + updatedPurchasedCredits
         }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },

@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Upload, FileText, Hash, Loader2, CheckCircle, AlertCircle, LogIn } from "lucide-react";
+import { Upload, FileText, Hash, Loader2, CheckCircle, AlertCircle, LogIn, ShoppingCart } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
+import CreditsDisplay from "./CreditsDisplay";
 
 interface FileInfo {
   name: string;
@@ -22,9 +23,10 @@ const FileAuthentication = () => {
   const [file, setFile] = useState<FileInfo | null>(null);
   const [processing, setProcessing] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [status, setStatus] = useState<'idle' | 'hashing' | 'uploading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'hashing' | 'uploading' | 'success' | 'error' | 'insufficient_credits'>('idle');
   const [session, setSession] = useState<Session | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [creditsRemaining, setCreditsRemaining] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -108,6 +110,15 @@ const FileAuthentication = () => {
       }
 
       if (!data.success) {
+        if (data.error === 'insufficient_credits') {
+          setStatus('insufficient_credits');
+          toast({
+            title: "Insufficient Credits",
+            description: "You need FOT tokens to authenticate more photos. Purchase tokens to continue.",
+            variant: "destructive",
+          });
+          return;
+        }
         throw new Error(data.error || 'Authentication failed');
       }
 
@@ -119,9 +130,10 @@ const FileAuthentication = () => {
       } : null);
 
       setStatus('success');
+      setCreditsRemaining(data.creditsRemaining || 0);
       toast({
-        title: "File authenticated successfully!",
-        description: "Your file hash has been recorded on the Solana blockchain.",
+        title: "Photo authenticated successfully!",
+        description: `Your photo hash has been recorded on the Solana blockchain. Credits remaining: ${data.creditsRemaining || 0}`,
       });
 
     } catch (error: any) {
@@ -151,10 +163,10 @@ const FileAuthentication = () => {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Authenticate Your Files
+              Authenticate Your Photos
             </h2>
             <p className="text-xl text-muted-foreground">
-              Upload a file to create an immutable blockchain record of its authenticity
+              Upload a photo to create an immutable blockchain record of its authenticity and fight deepfakes
             </p>
           </div>
 
@@ -187,6 +199,14 @@ const FileAuthentication = () => {
                 </div>
               ) : (
                 <>
+              {/* Credits Display */}
+              <CreditsDisplay 
+                session={session} 
+                onCreditsUpdate={(credits) => {
+                  setCreditsRemaining(credits.free_credits_remaining + credits.purchased_credits);
+                }}
+              />
+
               {/* Upload Area */}
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-all ${
@@ -200,8 +220,8 @@ const FileAuthentication = () => {
                 onDrop={handleDrop}
               >
                 <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                <h3 className="text-lg font-semibold mb-2">Drop your file here</h3>
-                <p className="text-muted-foreground mb-4">or click to browse</p>
+                <h3 className="text-lg font-semibold mb-2">Drop your photo here</h3>
+                <p className="text-muted-foreground mb-4">or click to browse (uses 1 credit)</p>
                 <input
                   type="file"
                   onChange={handleFileInput}
@@ -212,13 +232,24 @@ const FileAuthentication = () => {
                 <Button 
                   variant="outline" 
                   asChild 
-                  disabled={processing}
+                  disabled={processing || creditsRemaining <= 0}
                   className="cursor-pointer"
                 >
                   <label htmlFor="file-upload">
-                    Select File
+                    {creditsRemaining <= 0 ? 'No Credits Remaining' : 'Select Photo'}
                   </label>
                 </Button>
+                {creditsRemaining <= 0 && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    disabled
+                    className="mt-2"
+                  >
+                    <ShoppingCart className="h-3 w-3 mr-1" />
+                    Buy FOT Tokens (Coming Soon)
+                  </Button>
+                )}
               </div>
 
               {/* File Info */}
@@ -244,6 +275,7 @@ const FileAuthentication = () => {
                         {status === 'uploading' && 'Recording'}
                         {status === 'success' && 'Authenticated'}
                         {status === 'error' && 'Failed'}
+                        {status === 'insufficient_credits' && 'Need Credits'}
                       </Badge>
                     </div>
 
@@ -295,7 +327,7 @@ const FileAuthentication = () => {
                   <CheckCircle className="h-5 w-5 text-success" />
                   <div>
                     <p className="text-sm font-medium text-success">Authentication Complete</p>
-                    <p className="text-xs text-muted-foreground">Your file has been recorded on the Solana blockchain</p>
+                    <p className="text-xs text-muted-foreground">Your photo has been recorded on the Solana blockchain. Credits remaining: {creditsRemaining}</p>
                   </div>
                 </div>
               )}
@@ -306,6 +338,16 @@ const FileAuthentication = () => {
                   <div>
                     <p className="text-sm font-medium text-destructive">Authentication Failed</p>
                     <p className="text-xs text-muted-foreground">Please try again or contact support</p>
+                  </div>
+                </div>
+              )}
+
+              {status === 'insufficient_credits' && (
+                <div className="flex items-center gap-2 p-4 bg-warning/10 border border-warning/20 rounded-lg">
+                  <ShoppingCart className="h-5 w-5 text-warning" />
+                  <div>
+                    <p className="text-sm font-medium text-warning">Insufficient Credits</p>
+                    <p className="text-xs text-muted-foreground">Purchase FOT tokens to continue authenticating photos (~$0.03 each)</p>
                   </div>
                 </div>
               )}

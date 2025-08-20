@@ -135,7 +135,7 @@ const FileVerification = () => {
               Verify Photo Authenticity
             </h2>
             <p className="text-xl text-muted-foreground">
-              Check if a photo has been authenticated on the blockchain to fight deepfakes
+              Check if a photo has been authenticated on the blockchain to fight deepfakes (free to use!)
             </p>
           </div>
 
