@@ -77,7 +77,7 @@ const AirdropPromo = () => {
               <CardDescription>Get started completely free</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-3xl font-bold text-primary mb-2">1,000</div>
+              <div className="text-3xl font-bold text-primary mb-2">100</div>
               <p className="text-sm text-muted-foreground">Free FOT tokens for signing up before Jan 1, 2026</p>
             </CardContent>
           </Card>
@@ -91,7 +91,7 @@ const AirdropPromo = () => {
               <CardDescription>Earn for every friend who joins</CardDescription>
             </CardHeader>
             <CardContent className="text-center">
-              <div className="text-3xl font-bold text-accent mb-2">100</div>
+              <div className="text-3xl font-bold text-accent mb-2">20</div>
               <p className="text-sm text-muted-foreground">FOT tokens per successful referral</p>
             </CardContent>
           </Card>

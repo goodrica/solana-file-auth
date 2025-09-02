@@ -103,7 +103,7 @@ const ReferralManager = () => {
     );
   }
 
-  const earnedTokens = referralData.referral_count * 100;
+  const earnedTokens = referralData.referral_count * 20;
 
   return (
     <div className="space-y-6">
@@ -113,7 +113,7 @@ const ReferralManager = () => {
             <Users className="h-5 w-5" />
             Your Referral Stats
           </CardTitle>
-          <CardDescription>Earn 100 FOT tokens for each successful referral</CardDescription>
+          <CardDescription>Earn 20 FOT tokens for each successful referral</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid md:grid-cols-3 gap-4">
@@ -169,7 +169,7 @@ const ReferralManager = () => {
             <ul className="text-sm text-muted-foreground space-y-1">
               <li>• Share your referral code with friends</li>
               <li>• They sign up using your code</li>
-              <li>• You both get 100 FOT tokens</li>
+              <li>• You both get 20 FOT tokens</li>
               <li>• No limit on referrals!</li>
             </ul>
           </div>
@@ -187,7 +187,7 @@ const ReferralManager = () => {
                 <div key={referral.id} className="flex justify-between items-center p-2 border rounded">
                   <span className="text-sm">Referral #{referral.id.slice(0, 8)}</span>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">+100 FOT</Badge>
+                    <Badge variant="secondary">+20 FOT</Badge>
                     <span className="text-xs text-muted-foreground">
                       {new Date(referral.created_at).toLocaleDateString()}
                     </span>
