@@ -14,6 +14,92 @@ export type Database = {
   }
   public: {
     Tables: {
+      airdrop_campaigns: {
+        Row: {
+          created_at: string
+          description: string | null
+          eligibility_criteria: Json
+          end_date: string
+          id: string
+          is_active: boolean
+          name: string
+          start_date: string
+          token_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          eligibility_criteria?: Json
+          end_date: string
+          id?: string
+          is_active?: boolean
+          name: string
+          start_date?: string
+          token_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          eligibility_criteria?: Json
+          end_date?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          start_date?: string
+          token_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      airdrop_participants: {
+        Row: {
+          campaign_id: string
+          claimed_at: string | null
+          created_at: string
+          id: string
+          is_eligible: boolean
+          tokens_allocated: number
+          tokens_claimed: number
+          updated_at: string
+          user_id: string
+          wallet_address: string | null
+        }
+        Insert: {
+          campaign_id: string
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          is_eligible?: boolean
+          tokens_allocated: number
+          tokens_claimed?: number
+          updated_at?: string
+          user_id: string
+          wallet_address?: string | null
+        }
+        Update: {
+          campaign_id?: string
+          claimed_at?: string | null
+          created_at?: string
+          id?: string
+          is_eligible?: boolean
+          tokens_allocated?: number
+          tokens_claimed?: number
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "airdrop_participants_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "airdrop_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       file_authentications: {
         Row: {
           authenticated_at: string
@@ -50,6 +136,36 @@ export type Database = {
         }
         Relationships: []
       }
+      referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          referred_user_id: string
+          referrer_user_id: string
+          reward_amount: number
+          reward_claimed: boolean
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_user_id: string
+          referrer_user_id: string
+          reward_amount?: number
+          reward_claimed?: boolean
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_user_id?: string
+          referrer_user_id?: string
+          reward_amount?: number
+          reward_claimed?: boolean
+        }
+        Relationships: []
+      }
       user_credits: {
         Row: {
           created_at: string
@@ -80,12 +196,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_profiles: {
+        Row: {
+          airdrop_eligible: boolean
+          created_at: string
+          id: string
+          referral_code: string
+          referred_by: string | null
+          signup_date: string
+          updated_at: string
+          user_id: string
+          wallet_address: string | null
+        }
+        Insert: {
+          airdrop_eligible?: boolean
+          created_at?: string
+          id?: string
+          referral_code: string
+          referred_by?: string | null
+          signup_date?: string
+          updated_at?: string
+          user_id: string
+          wallet_address?: string | null
+        }
+        Update: {
+          airdrop_eligible?: boolean
+          created_at?: string
+          id?: string
+          referral_code?: string
+          referred_by?: string | null
+          signup_date?: string
+          updated_at?: string
+          user_id?: string
+          wallet_address?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      generate_referral_code: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
