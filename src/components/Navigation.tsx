@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, FileCheck, Verified, LogOut, User } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { WalletConnection } from "./WalletConnection";
 import type { Session } from "@supabase/supabase-js";
 
 const Navigation = () => {
@@ -74,6 +75,7 @@ const Navigation = () => {
           <div className="flex items-center space-x-3">
             {session ? (
               <div className="flex items-center space-x-3">
+                <WalletConnection />
                 <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard'}>
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline ml-2">Dashboard</span>
