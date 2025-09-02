@@ -6,15 +6,23 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Lock, User, Mail } from "lucide-react";
+import { Loader2, Lock, User, Mail, Users } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
+  const [referralCode, setReferralCode] = useState('');
   const { toast } = useToast();
 
   useEffect(() => {
+    // Check for referral code in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const refCode = urlParams.get('ref');
+    if (refCode) {
+      setReferralCode(refCode);
+    }
+
     // Check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
@@ -53,6 +61,7 @@ const Auth = () => {
     const email = formData.get('signup-email') as string;
     const password = formData.get('signup-password') as string;
     const confirmPassword = formData.get('confirm-password') as string;
+    const referralCodeInput = (formData.get('referral-code') as string) || referralCode;
 
     if (password !== confirmPassword) {
       toast({
@@ -67,13 +76,22 @@ const Auth = () => {
     try {
       cleanupAuthState();
       
-      const { data, error } = await supabase.auth.signUp({
+      const signUpData: any = {
         email,
         password,
         options: {
           emailRedirectTo: `${window.location.origin}/`
         }
-      });
+      };
+
+      // Add referral code to user metadata if provided
+      if (referralCodeInput) {
+        signUpData.options.data = {
+          referred_by: referralCodeInput
+        };
+      }
+      
+      const { data, error } = await supabase.auth.signUp(signUpData);
 
       if (error) throw error;
 
@@ -85,7 +103,9 @@ const Auth = () => {
       } else if (data.session) {
         toast({
           title: "Account created successfully!",
-          description: "Welcome to the platform.",
+          description: referralCodeInput 
+            ? "Welcome to the platform! Your referral has been recorded." 
+            : "Welcome to the platform.",
         });
         window.location.href = '/';
       }
@@ -273,6 +293,27 @@ const Auth = () => {
                       minLength={6}
                     />
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="referral-code">Referral Code (Optional)</Label>
+                  <div className="relative">
+                    <Users className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      id="referral-code"
+                      name="referral-code"
+                      type="text"
+                      placeholder="Enter referral code"
+                      className="pl-10"
+                      disabled={loading}
+                      value={referralCode}
+                      onChange={(e) => setReferralCode(e.target.value)}
+                    />
+                  </div>
+                  {referralCode && (
+                    <p className="text-xs text-muted-foreground">
+                      🎁 You'll receive bonus tokens for using a referral code!
+                    </p>
+                  )}
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
                   {loading ? (

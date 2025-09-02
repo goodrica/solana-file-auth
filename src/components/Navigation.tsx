@@ -74,8 +74,11 @@ const Navigation = () => {
           <div className="flex items-center space-x-3">
             {session ? (
               <div className="flex items-center space-x-3">
+                <Button variant="ghost" size="sm" onClick={() => window.location.href = '/dashboard'}>
+                  <User className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Dashboard</span>
+                </Button>
                 <div className="hidden sm:flex items-center space-x-2 text-sm">
-                  <User className="h-4 w-4 text-muted-foreground" />
                   <span className="text-muted-foreground">{session.user.email}</span>
                 </div>
                 <Button variant="outline" size="sm" onClick={handleSignOut}>
