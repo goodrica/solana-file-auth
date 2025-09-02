@@ -114,7 +114,7 @@ const FotTokenPurchase = ({ session, onPurchaseComplete, children }: FotTokenPur
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <Coins className="h-5 w-5 text-primary" />
+            <img src="/lovable-uploads/72ed1675-d1de-4e94-8d8f-c8f58001d250.png" alt="FOT Token" className="h-5 w-5" />
             Buy FOT Tokens
           </DialogTitle>
           <DialogDescription>
@@ -145,7 +145,10 @@ const FotTokenPurchase = ({ session, onPurchaseComplete, children }: FotTokenPur
                       onClick={() => handleAmountSelect(amount)}
                     >
                       <CardContent className="p-4 text-center">
-                        <div className="text-lg font-semibold">{amount}</div>
+                        <div className="text-lg font-semibold flex items-center gap-2">
+                          <img src="/lovable-uploads/72ed1675-d1de-4e94-8d8f-c8f58001d250.png" alt="FOT Token" className="h-4 w-4" />
+                          {amount}
+                        </div>
                         <div className="text-sm text-muted-foreground">FOT tokens</div>
                         <Badge variant="outline" className="mt-2">
                           ~${(amount * purchaseInfo.pricePerToken).toFixed(2)}

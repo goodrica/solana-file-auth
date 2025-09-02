@@ -118,7 +118,7 @@ const AirdropPromo = () => {
               className="text-lg px-8"
               onClick={() => window.location.href = '/auth'}
             >
-              <Coins className="h-5 w-5 mr-2" />
+              <img src="/lovable-uploads/72ed1675-d1de-4e94-8d8f-c8f58001d250.png" alt="FOT Token" className="h-5 w-5 mr-2" />
               Sign Up for Free Tokens
             </Button>
             <Button 

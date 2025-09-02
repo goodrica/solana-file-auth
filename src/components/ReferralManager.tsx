@@ -110,7 +110,7 @@ const ReferralManager = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="h-5 w-5" />
+            <img src="/lovable-uploads/72ed1675-d1de-4e94-8d8f-c8f58001d250.png" alt="FOT Token" className="h-5 w-5" />
             Your Referral Stats
           </CardTitle>
           <CardDescription>Earn 20 FOT tokens for each successful referral</CardDescription>
@@ -187,7 +187,10 @@ const ReferralManager = () => {
                 <div key={referral.id} className="flex justify-between items-center p-2 border rounded">
                   <span className="text-sm">Referral #{referral.id.slice(0, 8)}</span>
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">+20 FOT</Badge>
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <img src="/lovable-uploads/72ed1675-d1de-4e94-8d8f-c8f58001d250.png" alt="FOT Token" className="h-3 w-3" />
+                      +20 FOT
+                    </Badge>
                     <span className="text-xs text-muted-foreground">
                       {new Date(referral.created_at).toLocaleDateString()}
                     </span>
