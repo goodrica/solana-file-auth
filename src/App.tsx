@@ -27,8 +27,6 @@ const App = () => (
             <Route path="/about" element={<About />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/assets/fot-metadata.json" element={<Metadata />} />
-            <Route path="/fot-metadata.json" element={<Metadata />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
