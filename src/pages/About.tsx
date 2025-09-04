@@ -1,5 +1,6 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
+import GetInvolvedForm from "@/components/GetInvolvedForm";
 import { Shield, Lock, Globe, DollarSign, Eye } from "lucide-react";
 
 const About = () => {
@@ -107,6 +108,20 @@ const About = () => {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Get Involved Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
+        <div className="container mx-auto max-w-2xl">
+          <h2 className="text-3xl font-bold mb-8 text-center">Get Involved in Development</h2>
+          <div className="bg-card rounded-lg p-8 shadow-sm border">
+            <p className="text-muted-foreground mb-8 text-center">
+              Interested in contributing to FilmAuth? We're always looking for passionate developers, 
+              designers, and blockchain enthusiasts to help build the future of digital media authentication.
+            </p>
+            <GetInvolvedForm />
           </div>
         </div>
       </section>
