@@ -6,8 +6,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// FOT Token mint address
-const FOT_MINT_ADDRESS = "4zaq8xFC2grs6u9q9gjSiQCPqmXCJeqKk9b1UiHzRovA";
+// FOT Token mint address (Mainnet)
+const FOT_MINT_ADDRESS = "BzqkFbXChYFwnsKVqmkgrLuBeES3YoyaepZfFybVsVYx";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
