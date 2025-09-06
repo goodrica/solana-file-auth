@@ -112,6 +112,35 @@ const About = () => {
         </div>
       </section>
 
+      {/* Why FOT Matters */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/50">
+        <div className="container mx-auto max-w-4xl">
+          <h2 className="text-3xl font-bold mb-8 text-center">Why FOT Matters</h2>
+          <div className="space-y-6 text-lg text-muted-foreground">
+            <p>
+              Why not invest in a crypto token you actually understand—one that serves a real purpose in the world? 
+              FOT isn't just another meme coin. It's a token you can explain to anyone.
+            </p>
+            <p>
+              Think of each FOT as a digital film negative. Once you use it, it's burned—just like an old roll of film—never 
+              to be reused. That action authenticates your digital photo at a moment in time, so any edits later can be proven fake.
+            </p>
+            <p>
+              Authenticating photos shouldn't be expensive, and neither should the token that powers it. We're building a 
+              community of people solving real problems, not chasing hype.
+            </p>
+            <p>
+              We're also transparent. Is FOT perfect today? No. But with your help, it can be. We need developers, creators, 
+              and believers to make it stronger—whether it's connecting FOT to major phone apps or pushing forward new tools 
+              for digital authenticity.
+            </p>
+            <p className="text-xl font-semibold text-foreground">
+              This is a movement for real change, and we're inviting you to be part of it.
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Get Involved Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 bg-muted/30">
         <div className="container mx-auto max-w-2xl">
