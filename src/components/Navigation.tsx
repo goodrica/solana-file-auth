@@ -80,6 +80,10 @@ const Navigation = () => {
                   <User className="h-4 w-4" />
                   <span className="hidden sm:inline ml-2">Dashboard</span>
                 </Button>
+                <Button variant="ghost" size="sm" onClick={() => window.location.href = '/admin'}>
+                  <Shield className="h-4 w-4" />
+                  <span className="hidden sm:inline ml-2">Admin</span>
+                </Button>
                 <div className="hidden sm:flex items-center space-x-2 text-sm">
                   <span className="text-muted-foreground">{session.user.email}</span>
                 </div>

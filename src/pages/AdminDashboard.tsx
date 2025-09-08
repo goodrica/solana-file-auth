@@ -7,13 +7,15 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings, Users, Gift, Send, Calendar } from "lucide-react";
+import { Settings, Users, Gift, Send, Calendar, Lock } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import Navigation from "@/components/Navigation";
+import type { User } from '@supabase/supabase-js';
 
 const AdminDashboard = () => {
-  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [user, setUser] = useState<User | null>(null);
+  const [campaigns, setCampaigns] = useState<any[]>([]);  
   const [participants, setParticipants] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -26,8 +28,23 @@ const AdminDashboard = () => {
   const { toast } = useToast();
 
   useEffect(() => {
-    fetchAdminData();
+    checkUserAuth();
   }, []);
+
+  const checkUserAuth = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        window.location.href = '/auth';
+        return;
+      }
+      setUser(user);
+      fetchAdminData();
+    } catch (error) {
+      console.error('Auth check error:', error);
+      window.location.href = '/auth';
+    }
+  };
 
   const fetchAdminData = async () => {
     try {
@@ -119,7 +136,32 @@ const AdminDashboard = () => {
       <div>
         <Navigation />
         <div className="container mx-auto px-4 py-8">
-          <div className="text-center">Loading admin dashboard...</div>
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <div className="text-lg">Loading admin dashboard...</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div>
+        <Navigation />
+        <div className="container mx-auto px-4 py-8">
+          <div className="flex items-center justify-center min-h-screen">
+            <div className="text-center">
+              <Lock className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+              <div className="text-lg mb-4">Access Restricted</div>
+              <p className="text-muted-foreground mb-6">You need to be signed in to access the admin dashboard.</p>
+              <Button onClick={() => window.location.href = '/auth'}>
+                Sign In
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
     );
