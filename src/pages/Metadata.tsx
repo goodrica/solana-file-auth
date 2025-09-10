@@ -5,8 +5,8 @@ const Metadata = () => {
     "name": "FilmAuth Token",
     "symbol": "FOT", 
     "description": "FilmAuth Token (FOT) is the native utility token for the FilmAuth blockchain file authentication platform. FOT enables users to verify file authenticity with unbreakable blockchain proof using Solana technology.",
-    "image": "https://filmauth.lovable.app/assets/fot-logo.png",
-    "external_url": "https://filmauth.lovable.app",
+    "image": "https://filmauthtoken.com/assets/fot-logo.png",
+    "external_url": "https://filmauthtoken.com",
     "attributes": [
       {
         "trait_type": "Token Type",
@@ -24,7 +24,7 @@ const Metadata = () => {
     "properties": {
       "files": [
         {
-          "uri": "https://filmauth.lovable.app/assets/fot-logo.png",
+          "uri": "https://filmauthtoken.com/assets/fot-logo.png",
           "type": "image/png"
         }
       ],
