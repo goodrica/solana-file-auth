@@ -6,13 +6,15 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Lock, User, Mail, Users } from "lucide-react";
+import { Loader2, Lock, User, Mail, Users, Coins, CheckCircle } from "lucide-react";
 import type { Session } from "@supabase/supabase-js";
+import FotTokenPurchase from "@/components/FotTokenPurchase";
 
 const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [referralCode, setReferralCode] = useState('');
+  const [showPurchaseOption, setShowPurchaseOption] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -107,7 +109,8 @@ const Auth = () => {
             ? "Welcome to the platform! Your referral has been recorded." 
             : "Welcome to the platform.",
         });
-        window.location.href = '/';
+        setSession(data.session);
+        setShowPurchaseOption(true);
       }
     } catch (error: any) {
       toast({
@@ -164,7 +167,7 @@ const Auth = () => {
   };
 
 
-  if (session) {
+  if (session && !showPurchaseOption) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted">
         <Card className="w-full max-w-md">
@@ -175,6 +178,56 @@ const Auth = () => {
             <Button onClick={() => window.location.href = '/'}>
               Go to Home
             </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (showPurchaseOption && session) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
+        <Card className="w-full max-w-md shadow-2xl border-border/50 bg-card/95 backdrop-blur-sm">
+          <CardHeader className="text-center space-y-2">
+            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-2">
+              <CheckCircle className="h-6 w-6 text-primary" />
+            </div>
+            <CardTitle className="text-2xl font-bold">Welcome!</CardTitle>
+            <CardDescription>
+              Your account has been created successfully. Would you like to purchase FOT tokens to get started?
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-muted/50 rounded-lg p-4 text-center">
+              <img src="/lovable-uploads/72ed1675-d1de-4e94-8d8f-c8f58001d250.png" alt="FOT Token" className="h-8 w-8 mx-auto mb-2" />
+              <h3 className="font-semibold text-sm mb-1">FOT Tokens</h3>
+              <p className="text-xs text-muted-foreground">
+                Use FOT tokens to authenticate your files on the blockchain. Each authentication costs 1 token (~$0.03).
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => window.location.href = '/'}
+                className="flex-1"
+              >
+                Skip for Now
+              </Button>
+              <FotTokenPurchase 
+                session={session}
+                onPurchaseComplete={() => window.location.href = '/'}
+              >
+                <Button className="flex-1">
+                  <Coins className="h-4 w-4 mr-2" />
+                  Buy Tokens
+                </Button>
+              </FotTokenPurchase>
+            </div>
+            
+            <p className="text-xs text-center text-muted-foreground">
+              You can always purchase tokens later from your dashboard
+            </p>
           </CardContent>
         </Card>
       </div>
