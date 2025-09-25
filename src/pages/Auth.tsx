@@ -194,7 +194,8 @@ const Auth = () => {
             </div>
             <CardTitle className="text-2xl font-bold">Welcome!</CardTitle>
             <CardDescription>
-              Your account has been created successfully. Would you like to purchase FOT tokens to get started?
+              Your account has been created successfully! You've received 100 FREE FOT tokens to get started. 
+              Want to purchase more tokens for additional file authentications?
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
@@ -245,6 +246,21 @@ const Auth = () => {
           <CardDescription>
             Sign in to your account or create a new one to get started
           </CardDescription>
+          
+          {/* Promotional Banner for 100 Free Tokens */}
+          <div className="bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-lg p-4 mt-4">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/20 rounded-full p-2">
+                <Coins className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm text-primary">🎁 Instant Airdrop!</h3>
+                <p className="text-xs text-muted-foreground">
+                  Get <span className="font-bold text-primary">100 FREE FOT tokens</span> instantly when you create your account
+                </p>
+              </div>
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">

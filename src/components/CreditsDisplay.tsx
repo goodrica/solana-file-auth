@@ -44,7 +44,7 @@ const CreditsDisplay = ({ session, onCreditsUpdate }: CreditsDisplayProps) => {
           .from('user_credits')
           .insert({
             user_id: session.user.id,
-            free_credits_remaining: 10,
+            free_credits_remaining: 100,
             purchased_credits: 0,
             total_authentications: 0
           })
