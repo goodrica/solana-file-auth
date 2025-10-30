@@ -26,15 +26,15 @@ const Hero = () => {
 
           {/* Main Heading */}
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
-            Verify Photo Authenticity with{" "}
-            <span className="gradient-text">Unbreakable</span>{" "}
-            Blockchain Proof
+            Solana Photo Authenticity Verification with{" "}
+            <span className="gradient-text">Blockchain</span>{" "}
+            Proof
           </h1>
 
           {/* Subtitle */}
           <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed">
-            FilmAuth provides cryptographic proof of your photo's authenticity using Solana blockchain technology. 
-            Fight deepfakes with secure, immutable, and verifiable digital proof.
+            Verify photo authenticity using Solana blockchain technology. FilmAuth provides cryptographic proof of digital photo authenticity with SHA-256 hashing on Solana. 
+            Fight deepfakes with secure, immutable photo verification on the Solana blockchain.
           </p>
 
           {/* CTA Buttons */}
