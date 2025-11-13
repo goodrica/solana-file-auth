@@ -18,6 +18,9 @@ const AdminDashboard = () => {
   const [campaigns, setCampaigns] = useState<any[]>([]);  
   const [participants, setParticipants] = useState<any[]>([]);
   const [referrals, setReferrals] = useState<any[]>([]);
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalFOTAvailable, setTotalFOTAvailable] = useState(0);
+  const [fotPrice, setFotPrice] = useState(0.10); // Current FOT price in USD
   const [isLoading, setIsLoading] = useState(true);
   const [newCampaign, setNewCampaign] = useState({
     name: '',
@@ -63,9 +66,23 @@ const AdminDashboard = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
+      // Fetch total users count
+      const { count: usersCount } = await supabase
+        .from('user_profiles')
+        .select('*', { count: 'exact', head: true });
+
+      // Fetch total FOT available (sum of all purchased_credits)
+      const { data: creditsData } = await supabase
+        .from('user_credits')
+        .select('purchased_credits');
+
+      const totalFOT = creditsData?.reduce((sum, record) => sum + record.purchased_credits, 0) || 0;
+
       setCampaigns(campaignsData || []);
       setParticipants(participantsData || []);
       setReferrals(referralsData || []);
+      setTotalUsers(usersCount || 0);
+      setTotalFOTAvailable(totalFOT);
     } catch (error) {
       console.error('Error fetching admin data:', error);
       toast({
@@ -180,7 +197,43 @@ const AdminDashboard = () => {
           <p className="text-muted-foreground">Manage airdrops, referrals, and campaigns</p>
         </div>
 
-        {/* Stats Cards */}
+        {/* Primary Stats Cards */}
+        <div className="grid md:grid-cols-3 gap-6 mb-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+              <Users className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalUsers}</div>
+              <p className="text-xs text-muted-foreground mt-1">Registered users</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total FOT Available</CardTitle>
+              <Gift className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalFOTAvailable.toLocaleString()}</div>
+              <p className="text-xs text-muted-foreground mt-1">Tokens in circulation</p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Current FOT Price</CardTitle>
+              <Settings className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${fotPrice.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground mt-1">USD per token</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Secondary Stats Cards */}
         <div className="grid md:grid-cols-4 gap-6 mb-8">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
