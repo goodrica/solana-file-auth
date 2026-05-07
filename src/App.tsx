@@ -10,6 +10,7 @@ import About from "./pages/About";
 import AdminDashboard from "./pages/AdminDashboard";
 import Dashboard from "./pages/Dashboard";
 import Metadata from "./pages/Metadata";
+import Tokenomics from "./pages/Tokenomics";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/about" element={<About />} />
+            <Route path="/tokenomics" element={<Tokenomics />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/fot-metadata.json" element={<Metadata />} />

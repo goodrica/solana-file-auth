@@ -69,6 +69,9 @@ const Navigation = () => {
             <a href="/about" className="text-muted-foreground hover:text-primary transition-colors">
               About
             </a>
+            <a href="/tokenomics" className="text-muted-foreground hover:text-primary transition-colors">
+              Tokenomics
+            </a>
           </div>
 
           {/* Auth Buttons */}
