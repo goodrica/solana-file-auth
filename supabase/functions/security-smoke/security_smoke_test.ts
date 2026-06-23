@@ -94,7 +94,10 @@ Deno.test("user_credits: anon cannot UPDATE", async () => {
   );
 });
 
-Deno.test("user_credits: authenticated user cannot UPDATE their own row", async () => {
+Deno.test({
+  name: "user_credits: authenticated user cannot UPDATE their own row",
+  ignore: !HAS_SERVICE_ROLE,
+  fn: async () => {
   const { client, userId, adminClient } = await createAuthedClient();
   try {
     // The signup trigger inserts a user_credits row with 100 free credits.
@@ -127,6 +130,7 @@ Deno.test("user_credits: authenticated user cannot UPDATE their own row", async 
   } finally {
     await deleteUser(adminClient, userId);
   }
+  },
 });
 
 // ---------------------------------------------------------------------------
@@ -145,7 +149,10 @@ Deno.test("airdrop_participants: anon cannot UPDATE", async () => {
   );
 });
 
-Deno.test("airdrop_participants: authenticated user cannot UPDATE rows", async () => {
+Deno.test({
+  name: "airdrop_participants: authenticated user cannot UPDATE rows",
+  ignore: !HAS_SERVICE_ROLE,
+  fn: async () => {
   const { client, userId, adminClient } = await createAuthedClient();
   try {
     const { data, error } = await client
@@ -161,20 +168,24 @@ Deno.test("airdrop_participants: authenticated user cannot UPDATE rows", async (
   } finally {
     await deleteUser(adminClient, userId);
   }
+  },
 });
 
 // ---------------------------------------------------------------------------
 // cards table (forward-looking guard)
 // ---------------------------------------------------------------------------
-Deno.test("cards: if table exists, anon SELECT must work and RLS must be enabled", async () => {
-  const adminClient = admin();
+Deno.test({
+  name: "cards: if table exists, anon SELECT must work and RLS must block anon writes",
+  ignore: !HAS_SERVICE_ROLE,
+  fn: async () => {
+    const adminClient = admin();
 
-  // Check existence via information_schema through a lightweight probe.
-  const { error: probeErr } = await adminClient.from("cards").select("*").limit(1);
-  if (probeErr && /relation .* does not exist|schema cache/i.test(probeErr.message)) {
-    console.log("cards table not present — skipping (forward-looking guard).");
-    return;
-  }
+    // Probe existence by selecting from cards with service role.
+    const { error: probeErr } = await adminClient.from("cards").select("*").limit(1);
+    if (probeErr && /relation .* does not exist|schema cache/i.test(probeErr.message)) {
+      console.log("cards table not present — skipping (forward-looking guard).");
+      return;
+    }
 
   // Table exists. Anon should be able to read (public catalog).
   const { error: anonErr } = await anon().from("cards").select("*").limit(1);
