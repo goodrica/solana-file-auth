@@ -19,13 +19,15 @@ import {
 } from "https://deno.land/std@0.224.0/assert/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
-const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+// Anon key and URL are public; fall back to literals when the test runner
+// does not inject them. Service role key must come from the environment.
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ??
+  "https://thfalxtopjlgpoiadcmt.supabase.co";
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ??
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoZmFseHRvcGpsZ3BvaWFkY210Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU2MTU2MTYsImV4cCI6MjA3MTE5MTYxNn0.aqK-oX4hYRZaIriLdvot3-esbEsXDT5_b19gTJOk6Ek";
+const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-assert(SUPABASE_URL, "SUPABASE_URL must be set");
-assert(ANON_KEY, "SUPABASE_ANON_KEY must be set");
-assert(SERVICE_ROLE_KEY, "SUPABASE_SERVICE_ROLE_KEY must be set");
+assert(SERVICE_ROLE_KEY, "SUPABASE_SERVICE_ROLE_KEY must be set in the env");
 
 const anon = () =>
   createClient(SUPABASE_URL, ANON_KEY, {
