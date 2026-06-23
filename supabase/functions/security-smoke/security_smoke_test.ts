@@ -205,4 +205,5 @@ Deno.test({
     writeErr !== null || (Array.isArray(writeData) && writeData.length === 0),
     "anon UPDATE on cards unexpectedly succeeded — RLS write policy missing",
   );
+  },
 });
