@@ -39,13 +39,14 @@ serve(async (req) => {
     }
     
     // Get environment variables
-    const quicknodeUrl = Deno.env.get('QUICKNODE_RPC_URL')
+    const rpcUrl = Deno.env.get('SOLANA_RPC_URL') ?? Deno.env.get('QUICKNODE_RPC_URL')
     const supabaseUrl = Deno.env.get('SUPABASE_URL')
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
 
-    if (!quicknodeUrl) {
-      throw new Error('QuickNode RPC URL not configured')
+    if (!rpcUrl) {
+      throw new Error('SOLANA_RPC_URL not configured')
     }
+
 
     if (!supabaseUrl || !supabaseKey) {
       throw new Error('Supabase configuration missing')
