@@ -5,3 +5,9 @@ verify_jwt = true
 
 [functions.fot-token-purchase]
 verify_jwt = true
+
+[functions.register]
+verify_jwt = false
+
+[functions.verify]
+verify_jwt = false
