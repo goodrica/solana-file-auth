@@ -78,7 +78,7 @@ serve(async (req) => {
     console.log(`Processing ${action} request for hash: ${fileHash}`)
 
     // Initialize Solana connection
-    const connection = new Connection(quicknodeUrl, 'confirmed')
+    const connection = new Connection(rpcUrl, 'confirmed')
 
     if (action === 'authenticate') {
       // Check user credits first
