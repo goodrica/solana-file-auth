@@ -1,7 +1,17 @@
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Coins, Flame, Users, TrendingUp, Lock, Gift } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Coins, Flame, Users, TrendingUp, Lock, Gift, ShieldCheck, AlertTriangle } from "lucide-react";
+
+// Token addresses — driven by .env so we can flip from devnet to mainnet
+// without code changes. The actual displayed mint comes from the env.
+const FOT_MINT_MAINNET = import.meta.env.VITE_FOT_MINT_MAINNET || "";
+const FOT_MINT_DEVNET = "4zaq8xFC2grs6u9q9gjSiQCPqmXCJeqKk9b1UiHzRovA";
+const IS_MAINNET_LIVE = FOT_MINT_MAINNET.length > 0;
+const DISPLAYED_MINT = IS_MAINNET_LIVE ? FOT_MINT_MAINNET : FOT_MINT_DEVNET;
+const SOLSCAN_NETWORK = IS_MAINNET_LIVE ? "" : "?cluster=devnet";
+const SOLSCAN_URL = `https://solscan.io/token/${DISPLAYED_MINT}${SOLSCAN_NETWORK}`;
 
 const Tokenomics = () => {
   return (
@@ -11,7 +21,7 @@ const Tokenomics = () => {
       {/* Hero */}
       <section className="relative pt-24 pb-12 px-4 sm:px-6 lg:px-8">
         <div className="container mx-auto max-w-5xl text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 gradient-text">
+          <h1 className="text-4xl md:5xl font-bold mb-6 gradient-text">
             FOT Tokenomics
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
@@ -21,6 +31,26 @@ const Tokenomics = () => {
           </p>
         </div>
       </section>
+
+      {/* Network status banner — only shows while on devnet */}
+      {!IS_MAINNET_LIVE && (
+        <section className="px-4 sm:px-6 lg:px-8 -mt-4">
+          <div className="container mx-auto max-w-5xl">
+            <Alert className="border-yellow-500/40 bg-yellow-500/10">
+              <AlertTriangle className="h-4 w-4 text-yellow-500" />
+              <AlertTitle className="text-yellow-500">Devnet preview</AlertTitle>
+              <AlertDescription>
+                The token shown below is on Solana <strong>devnet</strong> and
+                is for testing only. It has no real value and can be reset by
+                the Solana Foundation. The mainnet mint will be announced on
+                our website and Twitter. See{" "}
+                <a href="https://github.com/goodrica/solana-file-auth/blob/main/MAINNET_LAUNCH.md" className="underline">MAINNET_LAUNCH.md</a>{" "}
+                for the deployment runbook.
+              </AlertDescription>
+            </Alert>
+          </div>
+        </section>
+      )}
 
       {/* Snapshot */}
       <section className="py-12 px-4 sm:px-6 lg:px-8">
@@ -63,12 +93,64 @@ const Tokenomics = () => {
           <div className="mt-6">
             <Card>
               <CardHeader>
-                <CardTitle>Mint Address</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  Mint Address
+                  {IS_MAINNET_LIVE && (
+                    <span className="inline-flex items-center gap-1 text-xs font-normal text-green-500 bg-green-500/10 px-2 py-0.5 rounded">
+                      <ShieldCheck className="h-3 w-3" />
+                      Mainnet
+                    </span>
+                  )}
+                  {!IS_MAINNET_LIVE && (
+                    <span className="inline-flex items-center gap-1 text-xs font-normal text-yellow-500 bg-yellow-500/10 px-2 py-0.5 rounded">
+                      <AlertTriangle className="h-3 w-3" />
+                      Devnet
+                    </span>
+                  )}
+                </CardTitle>
               </CardHeader>
               <CardContent>
-                <code className="text-sm break-all bg-muted px-3 py-2 rounded-md inline-block">
-                  4zaq8xFC2grs6u9q9gjSiQCPqmXCJeqKk9b1UiHzRovA
-                </code>
+                <a
+                  href={SOLSCAN_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm break-all bg-muted px-3 py-2 rounded-md inline-block hover:bg-muted/70 transition-colors"
+                >
+                  {DISPLAYED_MINT}
+                </a>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Click to verify on Solscan. On mainnet, mint authority and
+                  freeze authority will both be revoked.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="mt-4 grid md:grid-cols-2 gap-4">
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground font-medium">Max Supply</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1,000,000,000 FOT</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Hard-capped on mainnet. Mint authority is revoked after
+                  initial distribution — no additional FOT can ever be
+                  created.
+                </p>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm text-muted-foreground font-medium">Authentications per FOT</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold">1 FOT = 1 burn</div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Every photo hash anchored on-chain permanently burns 1 FOT
+                  from the user's wallet. Burn transactions are visible on
+                  Solscan.
+                </p>
               </CardContent>
             </Card>
           </div>

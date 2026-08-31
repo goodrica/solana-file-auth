@@ -1,0 +1,44 @@
+# gitleaks configuration for FilmAuth
+# Docs: https://github.com/gitleaks/gitleaks/blob/master/config/gitleaks.toml
+
+title = "FilmAuth gitleaks config"
+
+[extend]
+# Use gitleaks' default ruleset (covers AWS, GitHub, Stripe, generic
+# API keys, private keys, JWTs, etc.) and add our own below.
+useDefault = true
+
+# Allow these specific files even if they look like secrets — they're
+# documentation / examples / mock values.
+[allowlist]
+paths = [
+  '''.env.example''',
+  '''.env\.sample''',
+  '''README\.md''',
+  '''MAINNET_LAUNCH\.md''',
+  '''TOKEN_REGISTRATION\.md''',
+  '''.github/.*''',
+]
+
+# Custom rules for our specific environment variables.
+[[rules]]
+id = "filmauth-supabase-anon-key"
+description = "FilmAuth Supabase anon key (publishable, but should not be in git)"
+# Match the actual anon key format we use (eyJ... long JWT)
+regex = '''eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,}\.[A-Za-z0-9_-]{20,}'''
+tags = ["supabase", "filmauth"]
+
+[[rules]]
+id = "filmauth-statcounter-security"
+description = "Statcounter security token (public but project-specific)"
+regex = '''sc_security\s*=\s*["'][a-f0-9]{8,}["']'''
+tags = ["statcounter", "filmauth"]
+
+[[rules]]
+id = "filmauth-solana-private-key"
+description = "Solana private key (base58 64-char secret key or JSON array)"
+regex = '''[1-9A-HJ-NP-Za-km-z]{80,128}'''
+entropy = 3.5
+tags = ["solana", "private-key"]
+# Reduce false positives by allowing only on contexts that look like
+# secret-key files. Default gitleaks already catches most key formats.

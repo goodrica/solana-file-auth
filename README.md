@@ -1,73 +1,177 @@
-# Welcome to your Lovable project
+# FilmAuth (FOT) — On-Chain Photo Authenticity
 
-## Project info
+> **Cryptographic proof that a photo is real, anchored to Solana.**
 
-**URL**: https://lovable.dev/projects/11c5c88c-2372-440a-b027-fb46a61e47f8
+FilmAuth lets anyone anchor a SHA-256 hash of a photo to the Solana
+blockchain, then verify later that the photo hasn't been edited or
+replaced. FOT is the utility token that powers the service — every
+authentication burns 1 FOT, like a digital film negative.
 
-## How can I edit this code?
+This repository contains the public web app (filmauthtoken.com) and the
+Supabase edge functions that orchestrate the on-chain writes. The
+on-chain program that does the actual anchoring is private during
+mainnet hardening; the public verification path is open here.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## What FOT does
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/11c5c88c-2372-440a-b027-fb46a61e47f8) and start prompting.
+1. User uploads a photo in the browser
+2. Browser computes the SHA-256 hash locally — **the photo never leaves the device for hashing**
+3. Hash + metadata is sent to a Supabase edge function
+4. The edge function submits a Solana transaction that writes the hash on-chain and burns 1 FOT
+5. The user gets a verifiable authentication ID + Solscan link
+6. Anyone can later submit a photo and ask: "is the hash of this photo on-chain?" — yes/no answer with proof
 
-Changes made via Lovable will be committed automatically to this repo.
+**Why burn?** A burned FOT can never be reused, so each authentication is
+provably unique. Total FOT supply monotonically decreases as the network
+is used. The token is tied to real platform activity, not speculation.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## Token (FOT)
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+| Field | Value |
+|---|---|
+| Symbol | FOT |
+| Name | FilmAuth Token |
+| Network | Solana (SPL) |
+| Decimals | 9 |
+| Initial supply | 1,000,000,000 FOT (1B) |
+| Mint authority | **Revoked on mainnet** (active on devnet) |
+| Freeze authority | **Revoked** |
+| Standard | SPL Token + Token-2022 metadata |
+| Utility price | $0.10 per FOT (1 FOT = 1 authentication) |
 
-Follow these steps:
+### Current deployment status
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+- **Devnet mint:** `4zaq8xFC2grs6u9q9gjSiQCPqmXCJeqKk9b1UiHzRovA` — for development only, no value
+- **Mainnet mint:** TBD — see [MAINNET_LAUNCH.md](./MAINNET_LAUNCH.md) for the runbook
+- **LP lock:** TBD — Streamflow lock proof will be linked here once mainnet launches
+- **Verified supply cap:** 1B (will be hard-coded into the mint instruction, then mint authority revoked)
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+---
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Repository layout
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+```
+.
+├── src/                          # React + Vite frontend
+│   ├── pages/                    # Route-level pages
+│   │   ├── Index.tsx             # Landing
+│   │   ├── Dashboard.tsx         # User auth/verify dashboard
+│   │   ├── Tokenomics.tsx        # FOT tokenomics page
+│   │   └── AdminDashboard.tsx    # Admin (auth-gated)
+│   ├── components/
+│   │   ├── FileAuthentication.tsx  # Hash + submit flow
+│   │   ├── FileVerification.tsx    # Verify by hash
+│   │   ├── FotTokenPurchase.tsx    # Buy FOT
+│   │   ├── AirdropPromo.tsx        # Airdrop + referral
+│   │   └── ...
+│   └── integrations/supabase/    # Supabase client + types
+├── supabase/
+│   ├── functions/                # 7 Deno edge functions
+│   │   ├── solana-file-auth/     # Main: write hash on-chain + burn FOT
+│   │   ├── fot-token-purchase/   # FOT purchase flow
+│   │   ├── verify/               # Hash lookup
+│   │   ├── register/             # User signup
+│   │   ├── process-airdrop/      # Airdrop distribution
+│   │   ├── send-involvement-email/
+│   │   └── security-smoke/       # Test harness
+│   └── migrations/               # 11 SQL migrations (Aug 2025 – Jun 2026)
+├── public/                       # Static assets
+│   ├── assets/fot-logo.png
+│   └── assets/fot-metadata.json  # Token-2022 metadata
+└── .env.example                  # Environment template (no secrets)
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Local development
 
-**Use GitHub Codespaces**
+```bash
+# Requirements: Node 20+, npm or bun
+git clone https://github.com/goodrica/solana-file-auth.git
+cd solana-file-auth
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Install
+npm install    # or: bun install
 
-## What technologies are used for this project?
+# Set up environment
+cp .env.example .env
+# Edit .env: add your Supabase URL + anon key (see .env.example for what to fill)
 
-This project is built with:
+# Run dev server
+npm run dev
+# → http://localhost:8080
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+For Supabase function work:
 
-## How can I deploy this project?
+```bash
+# Install Supabase CLI
+brew install supabase/tap/supabase   # or download from supabase.com
 
-Simply open [Lovable](https://lovable.dev/projects/11c5c88c-2372-440a-b027-fb46a61e47f8) and click on Share -> Publish.
+# Link to the project (requires project access)
+supabase link --project-ref thfalxtopjlgpoiadcmt
 
-## Can I connect a custom domain to my Lovable project?
+# Run a single function locally
+supabase functions serve solana-file-auth --no-verify-jwt
+```
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Trust & verification
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Before trusting FOT with anything, verify the project yourself:
+
+| What to check | Where to look |
+|---|---|
+| Token exists on-chain | Solscan → search the mint address |
+| Mint authority revoked | Solscan → mint page → "Mint Authority" should say "None" or "Disabled" |
+| Freeze authority revoked | Solscan → mint page → "Freeze Authority" should say "None" or "Disabled" |
+| LP locked | Streamflow lock page (linked in Tokenomics page) |
+| Supply cap | Solscan → mint page → "Supply" should match the cap |
+| Source code open | This repo |
+| Smart contract audits | (TBD — see [SECURITY.md](./SECURITY.md) when published) |
+
+If any of these are missing or different from what this README claims,
+**the token may not be the one we control. Verify before interacting.**
+
+---
+
+## Deployment model
+
+```
+Browser (Vite)         Supabase (Auth + DB + Edge Functions)        Solana
+─────────────────     ─────────────────────────────────────        ──────
+SHA-256 hash in JS  →  Edge function: validate + build tx       →   Hash written
+                       Look up user credits (DB)                     FOT burned
+                       Verify balance (RPC)                         Tx confirmed
+                       Sign + send tx (or return unsigned)            ↓
+                                                                    Solscan link
+                       ←  {authId, signature, timestamp}              returned
+```
+
+The user signs the Solana transaction in their own wallet. The
+application never holds user funds or signs on the user's behalf.
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+## Security disclosure
+
+Email: security@filmauthtoken.com (or open a private security advisory
+on GitHub). Do not file public issues for security bugs.
+
+## Links
+
+- Website: https://www.filmauthtoken.com
+- Twitter/X: TBD
+- Discord: TBD
+- GitHub: https://github.com/goodrica/solana-file-auth
+- Token registration: [TOKEN_REGISTRATION.md](./TOKEN_REGISTRATION.md)
+- Mainnet launch runbook: [MAINNET_LAUNCH.md](./MAINNET_LAUNCH.md)
