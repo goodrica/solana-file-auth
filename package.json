@@ -7,6 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "build:dev": "vite build --mode development",
+    "test:a2a": "tsx --test src/lib/a2a-trust/__tests__/a2a-trust.test.ts",
+    "a2a:cli": "tsx src/lib/a2a-trust/cli.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
