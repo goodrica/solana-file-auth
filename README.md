@@ -16,16 +16,34 @@ mainnet hardening; the public verification path is open here.
 
 ## What FOT does
 
-1. User uploads a photo in the browser
-2. Browser computes the SHA-256 hash locally — **the photo never leaves the device for hashing**
-3. Hash + metadata is sent to a Supabase edge function
-4. The edge function submits a Solana transaction that writes the hash on-chain and burns 1 FOT
-5. The user gets a verifiable authentication ID + Solscan link
-6. Anyone can later submit a photo and ask: "is the hash of this photo on-chain?" — yes/no answer with proof
+1. User uploads a photo in the browser (or an autonomous AI agent produces a deliverable)
+2. Computes the SHA-256 hash locally — **the file/payload never leaves the device for hashing**
+3. Submits a Solana transaction that anchors the hash on-chain and burns 1 FOT
+4. The caller receives a verifiable proof + Solscan link
+5. Anyone can verify: "is the cryptographic hash of this output anchored on-chain?" — yes/no answer with proof
 
-**Why burn?** A burned FOT can never be reused, so each authentication is
+**Why burn?** A burned FOT can never be reused, so each authentication/deliverable is
 provably unique. Total FOT supply monotonically decreases as the network
 is used. The token is tied to real platform activity, not speculation.
+
+---
+
+## 🤖 A2A Trust & Internet Court Performance Bond
+
+FilmAuth powers the **Agent-to-Agent (A2A) Trust & Bond Protocol**, enabling autonomous AI agents to transact, anchor deliverables, and settle escrows with cryptographic accountability:
+
+- **Proof-of-Deliverable:** When an agent finishes a task (code, dataset, research), its hash is anchored on Solana and 1 FOT is burned.
+- **Seller Performance Bond:** Agents stake FOT as a performance bond.
+- **Dispute Resolution & Slashing:** Integrates with [Internet Court](https://github.com/internet-court/internet-court-skill) adjudication (GenLayer, Kleros, UMA). If deliverable fails empirical checks, seller bond is slashed.
+- **SDK & CLI:** Run `npm run test:a2a` or `npx tsx src/lib/a2a-trust/cli.ts` (see [A2A Trust Specification](./docs/A2A_TRUST_SPEC.md) & [Internet Court Integration](./docs/INTERNET_COURT_INTEGRATION.md)).
+
+```bash
+# Agent CLI Quickstart
+npx tsx src/lib/a2a-trust/cli.ts hash deliverable.json
+npx tsx src/lib/a2a-trust/cli.ts propose-deal --buyer <PUBKEY> --seller <PUBKEY> --amount 1000000000 --bond 100
+npx tsx src/lib/a2a-trust/cli.ts anchor --deal-id deal_abc123 --file deliverable.json
+npx tsx src/lib/a2a-trust/cli.ts verify --file deliverable.json --hash <SHA256>
+```
 
 ---
 
