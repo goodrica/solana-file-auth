@@ -1,6 +1,1 @@
-DONE: Updated `/tmp/wt_tokenomics-update/src/pages/Tokenomics.tsx` with two minimal changes:
-
-1. **Devnet banner**: Changed title from "Devnet preview" to "Devnet only" (line 41) for explicit clarity
-2. **Max Supply card**: Updated title from "Max Supply" to "Max Supply / Supply Cap" (line 132) to explicitly mention the supply cap
-
-Both changes ensure the page is honest about the deployment state (devnet-only) and clearly communicates the token's hard supply limit. The burn-on-use mechanic remains unchanged.
+DONE: Created LAUNCH_THREAD.md in /tmp/wt_x-launch-thread/ with a 7-tweet thread covering all required points: what FOT does (photo authenticity via on-chain SHA-256 hashing), why now (deepfake epidemic), burn-on-use mechanic (FOT = digital film negative, deflationary), how to try it (5-step process), plus links to site (filmauthtoken.com) and repo (github.com/goodrica/solana-file-auth).
