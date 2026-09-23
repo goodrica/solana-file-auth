@@ -145,12 +145,12 @@ Before trusting FOT with anything, verify the project yourself:
 
 | What to check | Where to look |
 |---|---|
-| Token exists on-chain | Solscan → search the mint address |
-| Mint authority revoked | Solscan → mint page → "Mint Authority" should say "None" or "Disabled" |
-| Freeze authority revoked | Solscan → mint page → "Freeze Authority" should say "None" or "Disabled" |
+| Token exists on-chain | [Solscan](https://solscan.io) → search the mint address |
+| Mint authority revoked | [Solscan](https://solscan.io) → mint page → "Mint Authority" should say "None" or "Disabled" |
+| Freeze authority revoked | [Solscan](https://solscan.io) → mint page → "Freeze Authority" should say "None" or "Disabled" |
 | LP locked | Streamflow lock page (linked in Tokenomics page) |
-| Supply cap | Solscan → mint page → "Supply" should match the cap |
-| Source code open | This repo |
+| Supply cap | [Solscan](https://solscan.io) → mint page → "Supply" should match the cap |
+| Source code open | [GitHub](https://github.com/goodrica/solana-file-auth) |
 | Smart contract audits | (TBD — see [SECURITY.md](./SECURITY.md) when published) |
 
 If any of these are missing or different from what this README claims,
