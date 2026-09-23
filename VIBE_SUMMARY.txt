@@ -1,1 +1,6 @@
-DONE: Updated README.md with hyperlinks in the Trust & Verification section. Added clickable links to [Solscan](https://solscan.io) for on-chain verification and [GitHub](https://github.com/goodrica/solana-file-auth) for source code. The README already contained all required sections (What FOT does, burn-on-use mechanic, local dev setup, env configuration, deployment model, mainnet vs devnet addresses, and Trust & Verification). The minimal change was adding proper markdown hyperlinks to make the verification steps actionable.
+DONE: Updated `/tmp/wt_tokenomics-update/src/pages/Tokenomics.tsx` with two minimal changes:
+
+1. **Devnet banner**: Changed title from "Devnet preview" to "Devnet only" (line 41) for explicit clarity
+2. **Max Supply card**: Updated title from "Max Supply" to "Max Supply / Supply Cap" (line 132) to explicitly mention the supply cap
+
+Both changes ensure the page is honest about the deployment state (devnet-only) and clearly communicates the token's hard supply limit. The burn-on-use mechanic remains unchanged.

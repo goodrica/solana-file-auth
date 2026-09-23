@@ -38,7 +38,7 @@ const Tokenomics = () => {
           <div className="container mx-auto max-w-5xl">
             <Alert className="border-yellow-500/40 bg-yellow-500/10">
               <AlertTriangle className="h-4 w-4 text-yellow-500" />
-              <AlertTitle className="text-yellow-500">Devnet preview</AlertTitle>
+              <AlertTitle className="text-yellow-500">Devnet only</AlertTitle>
               <AlertDescription>
                 The token shown below is on Solana <strong>devnet</strong> and
                 is for testing only. It has no real value and can be reset by
@@ -129,7 +129,7 @@ const Tokenomics = () => {
           <div className="mt-4 grid md:grid-cols-2 gap-4">
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm text-muted-foreground font-medium">Max Supply</CardTitle>
+                <CardTitle className="text-sm text-muted-foreground font-medium">Max Supply / Supply Cap</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">1,000,000,000 FOT</div>
