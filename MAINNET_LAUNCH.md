@@ -12,45 +12,63 @@
 - [ ] Set up Streamflow account (https://streamflow.finance)
 - [ ] Set up Raydium or Orca LP (https://raydium.io or https://www.orca.so)
 - [ ] Back up the mint authority wallet's seed phrase OFFLINE
+- [ ] Fund the fee-payer wallet (~2–4 SOL covers mint rent, metadata, and fees)
+- [ ] Confirm both URLs are live: `assets/fot-logo.png` and `assets/fot-metadata.json`
+      on https://filmauthtoken.com (the mint's metadata URI points there)
 
 ## Step 1 — Mint the token on mainnet
 
-Use `spl-token` CLI (install with `npm install -g @solana/spl-token`):
+Use `spl-token` CLI (install/update with `npm install -g @solana/spl-token`;
+`--enable-metadata` and `initialize-metadata` need spl-token ≥ 0.4.0 —
+check with `spl-token --version`):
 
 ```bash
-# Create the mint. Authority is your chosen wallet.
+# 1a. Create the Token-2022 mint with the metadata extension enabled.
+#     (--url is the RPC/cluster flag — NOT metadata. Metadata is added
+#     with --enable-metadata here and populated via initialize-metadata.)
 spl-token create-token \
+  --program-id TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb \
   --decimals 9 \
-  --url "https://filmauthtoken.com/assets/fot-metadata.json" \
+  --enable-metadata \
   --fee-payer ~/.config/solana/id.json \
   --mint-authority ~/.config/solana/id.json \
   --freeze-authority ~/.config/solana/id.json
 
-# Save the resulting mint address — this is your mainnet mint.
+# 1b. Save the resulting mint address — this is your mainnet mint.
 MAINNET_MINT="PASTE_NEW_MINT_ADDRESS_HERE"
 echo "Mainnet mint: $MAINNET_MINT"
+
+# 1c. Populate the on-mint metadata (name, symbol, URI -> the hosted JSON).
+spl-token --program-id TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb \
+  initialize-metadata $MAINNET_MINT \
+  "FilmAuth Token" "FOT" \
+  "https://filmauthtoken.com/assets/fot-metadata.json"
 ```
 
 **Verify:** Search `$MAINNET_MINT` on https://solscan.io. The page
 should show:
+- Program: Token-2022 (`TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb`)
 - Supply: 0 (nothing minted yet)
 - Decimals: 9
+- Metadata: name "FilmAuth Token", symbol "FOT", URI resolving to the
+  hosted JSON above (broken icon = the URI doesn't resolve — fix first)
 - Mint authority: your wallet address
 - Freeze authority: your wallet address
-- Token-2022 metadata: pointing to the URL above (if the metadata URL
-  doesn't resolve, Solscan will show a broken icon — fix the URL first)
 
 ## Step 2 — Mint the initial supply
 
 ```bash
-# Create the associated token account for your treasury
+# Create the treasury's associated token account and CAPTURE its address —
+# --recipient below needs the TOKEN ACCOUNT, not the owner wallet.
 TREASURY="YOUR_TREASURY_WALLET_ADDRESS"
-spl-token create-account $MAINNET_MINT --owner $TREASURY
+TREASURY_ATA="$(spl-token create-account $MAINNET_MINT --owner $TREASURY \
+  --fee-payer ~/.config/solana/id.json | awk '/Creating account/ {print $3}')"
+echo "Treasury token account: $TREASURY_ATA"
 
-# Mint the full supply to the treasury (no decimals — uses smallest unit)
+# Mint the full supply into it (no decimals — uses the smallest unit)
 # 1B FOT * 10^9 = 1_000_000_000_000_000_000
 spl-token mint $MAINNET_MINT 1000000000000000000 \
-  --recipient $TREASURY \
+  --recipient "$TREASURY_ATA" \
   --mint-authority ~/.config/solana/id.json
 ```
 
@@ -124,31 +142,46 @@ Anyone can view this URL. **This is the proof that you cannot rug.**
 
 ## Step 6 — Update all references
 
-The site and repo currently point at the devnet mint. Replace:
+Run the cutover script (it flips `.env`, TOKEN_REGISTRATION.md, and
+generates the registry metadata entry):
 
-1. **`src/pages/Tokenomics.tsx`** — replace the devnet mint with the
-   mainnet one; remove the "devnet only" banner; add the lock URL
-2. **`src/components/FotTokenPurchase.tsx`** — same
+```bash
+./scripts/cutover-to-mainnet.sh "$MAINNET_MINT" "$LOCK_URL"
+```
+
+The front-end switches to mainnet automatically when
+`VITE_FOT_MINT_MAINNET` is non-empty (Tokenomics devnet banner hides
+itself). Still check by hand:
+
+1. **`src/pages/Tokenomics.tsx`** — verify the flip rendered; add the
+   Streamflow lock URL where the page wants it
+2. **`src/components/FotTokenPurchase.tsx`** — verify it uses the
+   mainnet mint from env
 3. **`public/assets/fot-metadata.json`** — already mainnet-agnostic
-4. **`src/integrations/supabase/types.ts`** — update any hardcoded mints
-5. **`.env`** (and `.env.example`) — set `VITE_FOT_MINT_MAINNET`
+4. **`src/integrations/supabase/types.ts`** — check for hardcoded devnet mints
+5. **`.env.example`** — document the new value (`.env` itself is gitignored)
 6. **README.md** — update the token table
+
+Then `npm run build` and deploy the site.
 
 ## Step 7 — Submit to registries
 
-See [TOKEN_REGISTRATION.md](./TOKEN_REGISTRATION.md) for the exact
-text to use. Order:
+See [TOKEN_REGISTRATION.md](./TOKEN_REGISTRATION.md) and the copy-paste
+pack in `launch-assets/REGISTRATION_COPY_PASTE.md`. Order:
 
-1. **Jupiter** (most important for DEX trading)
-2. **Solana token list** (for wallet recognition)
-3. **CoinGecko** (free listing, takes 1-4 weeks)
-4. **CoinMarketCap** (slower, stricter)
-5. **Birdeye** (auto-indexes after Jupiter)
-6. **DexScreener** (auto-indexes when LP exists)
+1. **Jupiter** — no application: the page appears automatically at
+   `jup.ag/tokens/<MINT>` once the LP exists; push community **smart
+   likes** there for the verified badge (the old token-list PR repo is
+   deprecated/closed)
+2. **DexScreener** (auto-indexes when LP exists — claim the profile)
+3. **Birdeye** (auto-indexes)
+4. **CoinGecko** (free listing, takes 1-4 weeks)
+5. **CoinMarketCap** (slower, stricter)
 
 ## Step 8 — Announce
 
-- Tweet the launch thread (see `LAUNCH_THREAD.md` when ready)
+- Tweet the launch thread (`LAUNCH_THREAD.md` — draft ready, review and
+  post on launch day; do not post before the mint is live)
 - Post in the project Discord (when set up)
 - Submit to r/CryptoCurrency and r/Solana (if appropriate)
 - Email the early airdrop list
