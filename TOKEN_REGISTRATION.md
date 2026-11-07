@@ -53,32 +53,31 @@ real value and can be reset by the Solana Foundation at any time.
 
 ### ⏳ Pending (after mainnet launch)
 
-- [ ] **Jupiter token list** — submit to https://github.com/jup-ag/token-list
-- [ ] **Solana token list** — submit to https://github.com/solana-labs/token-list
+- [ ] **Jupiter** — token page appears automatically at `jup.ag/tokens/<MINT>`
+      once LP exists; verification (checkmark) needs community **smart likes**.
+      No application: the `jup-ag/token-list` PR repo is deprecated/closed.
 - [ ] **CoinGecko** — https://www.coingecko.com/en/coins/new
 - [ ] **CoinMarketCap** — https://coinmarketcap.com/request/
-- [ ] **Birdeye** — automatic once Jupiter-verified
+- [ ] **Birdeye** — automatic once LP + Jupiter page exist
 - [ ] **DexScreener** — automatic once LP exists
 
 ## How to submit (after mainnet)
 
-### Jupiter token list
+### Jupiter
 
-1. Fork https://github.com/jup-ag/token-list
-2. Add a new file under `src/tokens/`:
-   ```json
-   {
-     "address": "MAINNET_MINT_HERE",
-     "chainId": 101,
-     "decimals": 9,
-     "name": "FilmAuth Token",
-     "symbol": "FOT",
-     "logoURI": "https://filmauthtoken.com/assets/fot-logo.png",
-     "tags": ["utility", "file-authentication"]
-   }
-   ```
-3. Open a pull request with the link to the lock proof and a brief
-   description. Jupiter reviews within ~3-5 days.
+No submission needed. Once the Raydium/Orca LP exists, the token is
+tradeable on Jupiter and its page lives at
+`https://jup.ag/tokens/<MAINNET_MINT>`.
+
+**Verification** (the checkmark badge) comes from Jupiter Verify: tokens
+with organic score and community **smart likes** on that page get
+verified. Steps:
+
+1. Post the launch thread with the mint address, tagging
+   `@JupiterExchange` (attestation tweet — keep the URL).
+2. Ask holders/community to open the token page and smart-like it.
+3. The PR-based `jup-ag/token-list` repo is **deprecated — all PRs are
+   closed**; do not submit there.
 
 ### CoinGecko
 
